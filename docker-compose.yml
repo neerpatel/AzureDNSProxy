@@ -1,0 +1,12 @@
+version: "3.1"
+services:
+    azure_dns_proxy:
+        build: .
+        container_name: azure_dns_proxy
+        restart: on-failure
+        expose:
+          - "53"
+          - "53/udp"
+        ports:
+           - "53:53"
+           - "53:53/udp"            
