@@ -1,0 +1,55 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: azurednsproxy
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: azurednsproxy
+  replicas: 1 # tells deployment to run 1 pods matching the template
+  template: # create pods using pod definition in this template
+    metadata:
+      labels:
+        app: azurednsproxy
+    spec:
+        containers:
+            - name: azurednsproxy
+              image: 'neerpatel/azurednsproxy:latest'
+              ports:
+                - name: dnsudp
+                  containerPort: 5353
+                  protocol: UDP
+                - name: dnstcp
+                  containerPort: 5353
+                  protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: azurednsproxy
+  namespace: azurednsproxy
+  labels:
+    app: azurednsproxy
+    app.kubernetesio/name: azurednsproxy
+    app.kubernetesio/part-of: azurednsproxy
+spec:
+  type:  
+  ports:
+  - name: dnstcp
+    port: 5353
+    targetPort: 5353
+  - name: dnsudp
+    port: 5353
+    protocol: UDP
+    targetPort: 5353    
+  selector:
+    app: azurednsproxy
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: azurednsproxy
+data:
+    53: "default/azurednsproxy:5353"
