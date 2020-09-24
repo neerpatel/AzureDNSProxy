@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: azurednsproxy
+  labels:
+    app: azurednsproxy
+spec:
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: azurednsproxy
+  template:
+    metadata:
+      name: azurednsproxy
+      labels:
+        app: azurednsproxy
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: azurednsproxy
+        image: 'neerpatel/azurednsproxy:latest'
+        ports:
+          - name: dnsudp
+            containerPort: 53
+            protocol: UDP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: azurednsproxy
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+  labels:
+    app: azurednsproxy
+    app.kubernetesio/name: azurednsproxy
+    app.kubernetesio/part-of: azurednsproxy
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 53
+    protocol: UDP
+  selector:
+    app: azurednsproxy
