@@ -29,9 +29,19 @@ RUN set -x && \
     ln -sf /dev/stdout /var/log/nginx/dns.log && \
     ln -sf /dev/stderr /var/log/nginx/error.log
 
-EXPOSE 53
-
 COPY nginx.conf /etc/nginx/nginx.conf
+
+RUN chown -R nginx:nginx /usr/local/sbin/nginx && chmod -R 755 /usr/local/sbin/nginx && \
+        chown -R nginx:nginx /var/log/nginx && \
+        chown -R nginx:nginx /etc/nginx/nginx.conf && chmod -R 755 /etc/nginx/nginx.conf
+RUN touch /var/run/nginx.pid && \
+        chown -R nginx:nginx /var/run/nginx.pid && \
+    touch /usr/local/nginx/logs/nginx.pid && \
+        chown -R nginx:nginx /usr/local/nginx/logs/nginx.pid
+
+USER nginx
+
+EXPOSE 5353
 
 RUN cat /etc/nginx/nginx.conf
 RUN nginx -v
