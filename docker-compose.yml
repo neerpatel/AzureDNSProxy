@@ -5,8 +5,8 @@ services:
         container_name: azurednsproxy
         restart: on-failure
         expose:
-          - "53"
-          - "53/udp"
+          - "5353"
+          - "5353/udp"
         ports:
-           - "53:53"
-           - "53:53/udp"            
+           - "53:5353"
+           - "53:5353/udp"            

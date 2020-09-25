@@ -22,7 +22,7 @@ spec:
         image: 'neerpatel/azurednsproxy:latest'
         ports:
           - name: dnsudp
-            containerPort: 53
+            containerPort: 5353
             protocol: UDP
 ---
 apiVersion: v1
