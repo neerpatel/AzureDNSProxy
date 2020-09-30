@@ -19,7 +19,7 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
       - name: azurednsproxy
-        image: 'neerpatel/azurednsproxy:latest'
+        image: 'neerpatel/azurednsproxy:alpine'
         ports:
           - name: dnsudp
             containerPort: 5353

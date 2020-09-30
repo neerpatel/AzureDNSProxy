@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM alpine:3.11
 
 LABEL maintainer="Neer Patel <neerpatel@gmail.com>"
 
@@ -6,16 +6,17 @@ ENV NGINX_VERSION   1.18.0
 
 RUN set -x && \
 # create nginx user/group first, to be consistent throughout docker variants
-    addgroup --system --gid 101 nginx && \
-    adduser --system --disabled-login --ingroup nginx --no-create-home --home /nonexistent --gecos "nginx user" --shell /bin/false --uid 101 nginx && \
-    apt-get update && apt-get upgrade -y && \
-    apt-get install -y wget libpcre3-dev build-essential libssl-dev zlib1g-dev && \
-    rm -rf /var/lib/apt/lists/* && \
-    mkdir -p /tmp/build/nginx && \
-    cd /tmp/build/nginx && \
-    wget -O nginx-1.18.0.tar.gz  https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz  && \
-    tar -zxf nginx-1.18.0.tar.gz && \
-    cd nginx-1.* && \
+    addgroup -g 101 -S nginx && \
+    adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx && \
+    tempDir="$(mktemp -d)" && \
+    chown nobody:nobody $tempDir && \
+    build_pkgs="build-base linux-headers openssl-dev pcre-dev wget zlib-dev" && \
+    runtime_pkgs="ca-certificates openssl pcre zlib tzdata git" && \
+    apk --no-cache add ${build_pkgs} ${runtime_pkgs} && \
+    cd $tempDir && \
+    wget -O nginx-${NGINX_VERSION}.tar.gz  https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz  && \
+    tar -zxf nginx-${NGINX_VERSION}.tar.gz && \
+    cd nginx-${NGINX_VERSION} && \
     ./configure \
         --sbin-path=/usr/local/sbin/nginx \
         --conf-path=/etc/nginx/nginx.conf \
@@ -24,10 +25,12 @@ RUN set -x && \
     make -j $(getconf _NPROCESSORS_ONLN) && \
     make install && \
     mkdir /var/lock/nginx && \
-    rm -rf /tmp/build && \
-    apt-get purge -y --auto-remove wget libpcre3-dev build-essential libssl-dev zlib1g-dev make && \
     ln -sf /dev/stdout /var/log/nginx/dns.log && \
-    ln -sf /dev/stderr /var/log/nginx/error.log
+    ln -sf /dev/stderr /var/log/nginx/error.log && \
+    rm -rf $tempDir && \
+    apk del ${build_pkgs} && \
+    rm -rf /var/cache/apk/*
+
 
 COPY nginx.conf /etc/nginx/nginx.conf
 

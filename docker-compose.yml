@@ -1,8 +1,7 @@
 version: "3.1"
 services:
     azurednsproxy:
-        build: .
-        container_name: azurednsproxy
+        image: azurednsproxy:alpine
         restart: on-failure
         expose:
           - "5353"
