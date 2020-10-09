@@ -29,6 +29,9 @@ RUN set -x && \
     ln -sf /dev/stdout /var/log/nginx/dns.log && \
     ln -sf /dev/stderr /var/log/nginx/error.log
 
+# make sure root login is disabled
+RUN sed -i -e 's/^root::/root:!:/' /etc/shadow
+
 COPY nginx.conf /etc/nginx/nginx.conf
 
 RUN chown -R nginx:nginx /usr/local/sbin/nginx && chmod -R 755 /usr/local/sbin/nginx && \
