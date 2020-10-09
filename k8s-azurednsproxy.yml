@@ -39,6 +39,7 @@ spec:
   type: LoadBalancer
   ports:
   - port: 53
+    targetPort: 5353
     protocol: UDP
   selector:
     app: azurednsproxy

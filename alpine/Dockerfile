@@ -1,4 +1,4 @@
-FROM alpine:3.11
+FROM alpine:3.12
 
 LABEL maintainer="Neer Patel <neerpatel@gmail.com>"
 
@@ -11,7 +11,7 @@ RUN set -x && \
     tempDir="$(mktemp -d)" && \
     chown nobody:nobody $tempDir && \
     build_pkgs="build-base linux-headers openssl-dev pcre-dev wget zlib-dev" && \
-    runtime_pkgs="ca-certificates openssl pcre zlib tzdata git" && \
+    runtime_pkgs="ca-certificates openssl pcre zlib tzdata" && \
     apk --no-cache add ${build_pkgs} ${runtime_pkgs} && \
     cd $tempDir && \
     wget -O nginx-${NGINX_VERSION}.tar.gz  https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz  && \
@@ -31,6 +31,8 @@ RUN set -x && \
     apk del ${build_pkgs} && \
     rm -rf /var/cache/apk/*
 
+# make sure root login is disabled
+RUN sed -i -e 's/^root::/root:!:/' /etc/shadow
 
 COPY nginx.conf /etc/nginx/nginx.conf
 
